@@ -1,0 +1,106 @@
+buildscript {
+	ext {
+		springBootVersion = '2.3.3.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+		maven { url "https://plugins.gradle.org/m2/" }
+		jcenter()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+plugins {
+	id 'org.springframework.boot' version '2.3.3.RELEASE'
+	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+	id 'java'
+}
+
+ext {
+	resilience4jVersion = '0.16.0'
+	springBootVersion = '2.3.3.RELEASE'
+}
+
+group = 'example.springdata.cassandra'
+
+jar {
+	archiveBaseName = 'springdatacassandra-service'
+	archiveVersion = '0.0.1-SNAPSHOT'
+}
+sourceCompatibility = '1.8'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url "https://repo.spring.io/milestone" }
+	maven { url "http://oss.jfrog.org/artifactory/oss-snapshot-local"}
+	jcenter()
+}
+
+apply plugin: 'java'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'application'
+
+mainClassName = 'example.springdata.cassandra.SpringDataCassandraApplication'
+bootJar.enabled = false
+bootDistZip.enabled = false
+bootDistTar.enabled = false
+jar.enabled = true
+distributions {
+	main {
+		contents {
+			exclude("**/spring-boot-devtools-*.jar")
+		}
+	}
+}
+applicationName = "springdata_cassandra"
+
+dependencies {
+	implementation "org.springframework.boot:spring-boot-starter-actuator:${springBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-data-cassandra-reactive:${springBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-webflux:${springBootVersion}"
+	implementation "org.springframework.boot:spring-boot-starter-aop:${springBootVersion}"
+	implementation 'com.datastax.cassandra:cassandra-driver-core:3.10.0'
+	implementation 'de.codecentric:spring-boot-admin-starter-client:2.2.4'
+	implementation 'uk.sky:cqlmigrate:0.10.3'
+	implementation 'io.dropwizard.metrics:metrics-core:3.1.0'
+	implementation 'javax.validation:validation-api:2.0.1.Final'
+	implementation "io.github.resilience4j:resilience4j-spring-boot2:${resilience4jVersion}"
+	implementation "io.github.resilience4j:resilience4j-reactor:${resilience4jVersion}"
+	implementation "io.github.resilience4j:resilience4j-all:${resilience4jVersion}"
+
+	testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+	testImplementation 'io.projectreactor:reactor-test'
+	testImplementation 'org.cassandraunit:cassandra-unit-spring:3.5.0.1'
+
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+}
+
+bootRun {
+	jvmArgs = [ '-Dspring.profiles.active=local' ]
+}
+
+test {
+	useJUnit()
+
+	forkEvery = 50
+	maxHeapSize = '1024'
+	reports.junitXml.enabled = true
+	testLogging.showStandardStreams = true
+}
+
+task clean_build_dir(type: Exec) {
+	commandLine 'rm', '-rf', 'build'
+}
+
+clean.dependsOn << [clean_build_dir]

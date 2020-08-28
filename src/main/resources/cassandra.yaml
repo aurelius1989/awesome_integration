@@ -1,0 +1,8 @@
+#cluster_name: 'datacenter1'
+#num_tokens: 256
+#seed_provider:
+#    - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+#          parameters:
+#                - seeds: "127.0.0.1"
+#listen_address:
+#endpoint_snitch: GossipingPropertyFileSnitch
